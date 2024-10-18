@@ -7,8 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
@@ -46,34 +48,68 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Counter(modifier: Modifier = Modifier) {
     var theCounter by remember { mutableStateOf(0L) }
+    var countdownTime by remember { mutableStateOf(99) }
     var miConterDown by remember{ mutableStateOf(CounterDown(99, {newvalue -> theCounter = newvalue}))}
-    var reseteo by remember { mutableStateOf(CounterDown(0,{newvalue -> theCounter = newvalue})) }
 
-    Column(modifier = Modifier.fillMaxSize()
-        .padding(16.dp),
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = theCounter.toString(),
+            modifier = modifier
+        )
 
-            Text(
-                text = theCounter.toString(),
-                modifier = modifier
-            )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = {
+                if (countdownTime > 1) countdownTime -= 1
+            }) {
+                Text(text = "-1s")
+            }
+
+            Text(text = "$countdownTime s", modifier = Modifier.padding(horizontal = 8.dp))
+
+            Button(onClick = {
+                countdownTime += 1
+            }) {
+                Text(text = "+1s")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
             Button(onClick = {
                 miConterDown.toggle()
             }) {
-                Text(
-                    text = "Pulsar"
-            )
+                Text(text = "Iniciar")
+            }
+
+
             Button(onClick = {
-                reseteo.toggle()
+
+                miConterDown.cancel()
+                theCounter = 0L
+                miConterDown = CounterDown(countdownTime) { newValue -> theCounter = newValue } // Creamos una nueva instancia para resetear
             }) {
-                Text(
-                    text = "reset"
-                )
+                Text(text = "Reset")
+            }
+
             }
         }
     }
-}
+
 
 
 
