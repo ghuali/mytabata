@@ -54,7 +54,7 @@ fun Counter(modifier: Modifier = Modifier) {
         mutableStateOf(CounterDown(countdownTime) { newValue -> theCounter = newValue })
     }
     var isResting by remember { mutableStateOf(false) }
-
+    var contadorsets by remember { mutableStateOf(1) }
 
     Column(
         modifier = Modifier
@@ -69,7 +69,24 @@ fun Counter(modifier: Modifier = Modifier) {
             modifier = modifier
         )
 
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = {
+                if (contadorsets > 1) contadorsets -= 1
+            }) {
+                Text(text = "-1s")
+            }
 
+            Text(text = "Sets: $contadorsets", modifier = Modifier.padding(horizontal = 8.dp))
+
+            Button(onClick = {
+                contadorsets += 1
+            }) {
+                Text(text = "+1s")
+            }
+        }
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
