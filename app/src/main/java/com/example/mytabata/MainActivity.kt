@@ -49,7 +49,12 @@ class MainActivity : ComponentActivity() {
 fun Counter(modifier: Modifier = Modifier) {
     var theCounter by remember { mutableStateOf(0L) }
     var countdownTime by remember { mutableStateOf(99) }
-    var miConterDown by remember{ mutableStateOf(CounterDown(99, {newvalue -> theCounter = newvalue}))}
+    var restTime by remember { mutableStateOf(30) }
+    var miConterDown by remember {
+        mutableStateOf(CounterDown(countdownTime) { newValue -> theCounter = newValue })
+    }
+    var isResting by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
@@ -58,8 +63,9 @@ fun Counter(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
-            text = theCounter.toString(),
+            text = if (isResting) "Descanso: $theCounter s" else "Tiempo: $theCounter s",
             modifier = modifier
         )
 
@@ -74,7 +80,7 @@ fun Counter(modifier: Modifier = Modifier) {
                 Text(text = "-1s")
             }
 
-            Text(text = "$countdownTime s", modifier = Modifier.padding(horizontal = 8.dp))
+            Text(text = "Tiempo: $countdownTime s", modifier = Modifier.padding(horizontal = 8.dp))
 
             Button(onClick = {
                 countdownTime += 1
@@ -85,6 +91,29 @@ fun Counter(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = {
+                if (restTime > 1) restTime -= 1
+            }) {
+                Text(text = "-1s")
+            }
+
+            Text(text = "Descanso: $restTime s", modifier = Modifier.padding(horizontal = 8.dp))
+
+            Button(onClick = {
+                restTime += 1
+            }) {
+                Text(text = "+1s")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -93,7 +122,7 @@ fun Counter(modifier: Modifier = Modifier) {
             Button(onClick = {
                 miConterDown.toggle()
             }) {
-                Text(text = "Iniciar")
+                Text(text = if (isResting) "Pausar Descanso" else "Pulsar")
             }
 
 
@@ -101,7 +130,15 @@ fun Counter(modifier: Modifier = Modifier) {
 
                 miConterDown.cancel()
                 theCounter = 0L
-                miConterDown = CounterDown(countdownTime) { newValue -> theCounter = newValue } // Creamos una nueva instancia para resetear
+                isResting = false
+                miConterDown = CounterDown(countdownTime) { newValue ->
+                    theCounter = newValue
+                    if (newValue == 0L && !isResting) {
+                        isResting = true
+                        miConterDown = CounterDown(restTime) { restValue -> theCounter = restValue }
+                        miConterDown.start()
+                    }
+                }
             }) {
                 Text(text = "Reset")
             }
