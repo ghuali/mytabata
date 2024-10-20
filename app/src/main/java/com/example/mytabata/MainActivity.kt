@@ -50,11 +50,12 @@ fun Counter(modifier: Modifier = Modifier) {
     var theCounter by remember { mutableStateOf(0L) }
     var countdownTime by remember { mutableStateOf(99) }
     var restTime by remember { mutableStateOf(30) }
+    var cycleCount by remember { mutableStateOf(1) }
+    var currentCycle by remember { mutableStateOf(1) }
     var miConterDown by remember {
         mutableStateOf(CounterDown(countdownTime) { newValue -> theCounter = newValue })
     }
     var isResting by remember { mutableStateOf(false) }
-    var contadorsets by remember { mutableStateOf(1) }
 
     Column(
         modifier = Modifier
@@ -65,28 +66,16 @@ fun Counter(modifier: Modifier = Modifier) {
     ) {
 
         Text(
+            text = "Ciclo: $currentCycle / $cycleCount",
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Text(
             text = if (isResting) "Descanso: $theCounter s" else "Tiempo: $theCounter s",
             modifier = modifier
         )
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(onClick = {
-                if (contadorsets > 1) contadorsets -= 1
-            }) {
-                Text(text = "-1s")
-            }
 
-            Text(text = "Sets: $contadorsets", modifier = Modifier.padding(horizontal = 8.dp))
-
-            Button(onClick = {
-                contadorsets += 1
-            }) {
-                Text(text = "+1s")
-            }
-        }
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -122,9 +111,30 @@ fun Counter(modifier: Modifier = Modifier) {
             Text(text = "Descanso: $restTime s", modifier = Modifier.padding(horizontal = 8.dp))
 
             Button(onClick = {
-                restTime += 1
+                restTime += 1 
             }) {
                 Text(text = "+1s")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = {
+                if (cycleCount > 1) cycleCount -= 1
+            }) {
+                Text(text = "-1 ciclo")
+            }
+
+            Text(text = "Ciclos: $cycleCount", modifier = Modifier.padding(horizontal = 8.dp))
+
+            Button(onClick = {
+                cycleCount += 1
+            }) {
+                Text(text = "+1 ciclo")
             }
         }
 
@@ -148,21 +158,31 @@ fun Counter(modifier: Modifier = Modifier) {
                 miConterDown.cancel()
                 theCounter = 0L
                 isResting = false
+                currentCycle = 1
                 miConterDown = CounterDown(countdownTime) { newValue ->
                     theCounter = newValue
-                    if (newValue == 0L && !isResting) {
-                        isResting = true
-                        miConterDown = CounterDown(restTime) { restValue -> theCounter = restValue }
-                        miConterDown.start()
+                    if (newValue == 0L) {
+                        if (isResting) {
+                            isResting = false
+                            if (currentCycle < cycleCount) {
+                                currentCycle++
+                                miConterDown = CounterDown(countdownTime) { workValue -> theCounter = workValue }
+                                miConterDown.start()
+                            }
+                        } else {
+                            isResting = true
+                            miConterDown = CounterDown(restTime) { restValue -> theCounter = restValue }
+                            miConterDown.start()
+                        }
                     }
                 }
             }) {
                 Text(text = "Reset")
             }
-
-            }
         }
     }
+}
+
 
 
 
